@@ -210,14 +210,14 @@ Follow `/evidence-driven-testing` for the evidence format. Evidence goes to `.ar
 
 - [ ] **Step 1: Rebase.** `git fetch origin && git rebase origin/main`. Rerun Task 5 Steps 1, 8 and 9 on the rebased tree.
 - [ ] **Step 2: Push.** `git push -u origin agent/tools-what-it-is-1102h`
-- [ ] **Step 3: Open the PR** through the Gitea API, `/api/v1/repos/JaeSwift/DaisyCap/pulls`, from `agent/tools-what-it-is-1102h` into `main`. Read the token from `git remote get-url origin` and never print it. Title: `feat(tools): the page says what DaisyCap is`.
+- [ ] **Step 3: Open the PR** with `gh pr create`, from `agent/tools-what-it-is-1102h` into `main`. Title: `feat(tools): the page says what DaisyCap is`.
 - [ ] **Step 4: PR body,** in this order:
   - What changed
   - Claims: the claims map with sources
   - Evidence: the before and after table, and the image paths
   - Checks: the outputs from Task 5
   - Risks and follow-ups
-- [ ] **Step 5: Risks to state.** `img/words.webp` stays on the server until deploy removes it, because the tar copy never deletes. The page has no dark theme, so the dark check doesn't apply. `/greploop` didn't run, since it doesn't support Gitea. The `gh` commands in AGENTS.md were replaced by the Gitea API.
+- [ ] **Step 5: Risks to state.** `img/words.webp` stays on the server until deploy removes it, because the tar copy never deletes. The page has no dark theme, so the dark check doesn't apply. `/greploop` didn't run in that session, because the repo was on Gitea then.
 - [ ] **Step 6: Follow-ups, as separate PRs.** PROGRESS.md still has Pro wording in several rows. `site/src/lib/site.ts` says version 0.1.0.
 - [ ] **Step 7:** Run `/unslop` over the title and body before posting. Don't merge.
 

@@ -52,7 +52,7 @@ The pages claim only what the app ships. Check a feature in `src/` before a page
 
 ## Pull requests
 
-The repo lives on Gitea at git.jaeswift.xyz. `gh` only reaches GitHub, so use the Gitea web UI or its API. Branch from `main`, open the PR against `main`, and don't merge your own PR unless it's agreed first.
+The repo lives on GitHub. Branch from `main`, open the PR against `main` with `gh pr create` or the web UI, and don't merge your own PR unless it's agreed first.
 
 Say what changed, how you tested it, and what is still unproven. Add before and after screenshots for anything visible.
 
