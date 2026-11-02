@@ -1,0 +1,124 @@
+//! Small Objective-C / CoreFoundation helpers.
+
+use objc2::rc::Retained;
+use objc2::runtime::AnyObject;
+use objc2_core_foundation::CFString;
+use objc2_core_media::{CMClock, CMTime};
+use objc2_foundation::{NSDictionary, NSNumber, NSString};
+
+/// An environment variable, accepting the old `GIMBAL_` spelling of any
+/// `DAISYCAP_` name, so older shell habits and scripts keep working.
+pub fn env(name: &str) -> Option<String> {
+    std::env::var(name).ok().or_else(|| std::env::var(legacy(name)).ok())
+}
+
+/// As [`env`], as an `OsString` (for values that may not be UTF-8).
+pub fn env_os(name: &str) -> Option<std::ffi::OsString> {
+    std::env::var_os(name).or_else(|| std::env::var_os(legacy(name)))
+}
+
+fn legacy(name: &str) -> String {
+    format!("GIMBAL_{}", name.strip_prefix("DAISYCAP_").unwrap_or(name))
+}
+
+pub type Dict = NSDictionary<NSString, AnyObject>;
+
+pub fn ns(s: &str) -> Retained<NSString> {
+    NSString::from_str(s)
+}
+
+/// Toll-free bridge a CFString to NSString.
+pub fn cf_ns(s: &CFString) -> &NSString {
+    unsafe { &*(s as *const CFString as *const NSString) }
+}
+
+pub fn num_i(v: i64) -> Retained<AnyObject> {
+    Retained::into_super(Retained::into_super(Retained::into_super(NSNumber::new_i64(v))))
+}
+pub fn num_f(v: f64) -> Retained<AnyObject> {
+    Retained::into_super(Retained::into_super(Retained::into_super(NSNumber::new_f64(v))))
+}
+pub fn num_b(v: bool) -> Retained<AnyObject> {
+    Retained::into_super(Retained::into_super(Retained::into_super(NSNumber::new_bool(v))))
+}
+pub fn obj<T: objc2::Message>(v: &T) -> Retained<AnyObject> {
+    unsafe { Retained::retain(v as *const T as *mut AnyObject) }.unwrap()
+}
+
+pub fn dict(pairs: Vec<(&NSString, Retained<AnyObject>)>) -> Retained<Dict> {
+    let keys: Vec<&NSString> = pairs.iter().map(|p| p.0).collect();
+    let vals: Vec<Retained<AnyObject>> = pairs.iter().map(|p| p.1.clone()).collect();
+    NSDictionary::from_retained_objects(&keys, &vals)
+}
+
+pub fn host_now() -> CMTime {
+    unsafe { CMClock::host_time_clock().time() }
+}
+
+pub fn secs(t: CMTime) -> f64 {
+    unsafe { t.seconds() }
+}
+
+/// Wrapper asserting a CoreFoundation/ObjC value may cross threads. All uses
+/// are serialized by a Mutex or are documented thread-safe CF types.
+pub struct SendBox<T>(pub T);
+unsafe impl<T> Send for SendBox<T> {}
+unsafe impl<T> Sync for SendBox<T> {}
+
+pub const fn fourcc(s: &[u8; 4]) -> u32 {
+    ((s[0] as u32) << 24) | ((s[1] as u32) << 16) | ((s[2] as u32) << 8) | (s[3] as u32)
+}
+pub const PIX_420V: u32 = fourcc(b"420v");
+pub const PIX_BGRA: u32 = fourcc(b"BGRA");
+
+pub fn make_pool(w: usize, h: usize, pix: u32) -> objc2_core_foundation::CFRetained<objc2_core_video::CVPixelBufferPool> {
+    let attrs = dict(vec![
+        (cf_ns(unsafe { objc2_core_video::kCVPixelBufferPixelFormatTypeKey }), num_i(pix as i64)),
+        (cf_ns(unsafe { objc2_core_video::kCVPixelBufferWidthKey }), num_i(w as i64)),
+        (cf_ns(unsafe { objc2_core_video::kCVPixelBufferHeightKey }), num_i(h as i64)),
+        (cf_ns(unsafe { objc2_core_video::kCVPixelBufferIOSurfacePropertiesKey }), obj(&*dict(vec![]))),
+    ]);
+    let attrs_cf: &objc2_core_foundation::CFDictionary =
+        unsafe { &*(&*attrs as *const Dict as *const objc2_core_foundation::CFDictionary) };
+    let mut pool = std::ptr::null_mut();
+    unsafe {
+        objc2_core_video::CVPixelBufferPool::create(None, None, Some(attrs_cf), std::ptr::NonNull::from(&mut pool));
+        objc2_core_foundation::CFRetained::from_raw(std::ptr::NonNull::new(pool).expect("pixel buffer pool"))
+    }
+}
+
+
+/// Local date-time like "2026-10-11 at 11.30.12" (for file names).
+pub fn timestamp_name() -> String {
+    unsafe {
+        let t = libc::time(std::ptr::null_mut());
+        let mut tm: libc::tm = std::mem::zeroed();
+        libc::localtime_r(&t, &mut tm);
+        format!(
+            "{:04}-{:02}-{:02} at {:02}.{:02}.{:02}",
+            tm.tm_year + 1900,
+            tm.tm_mon + 1,
+            tm.tm_mday,
+            tm.tm_hour,
+            tm.tm_min,
+            tm.tm_sec
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn env_accepts_the_old_name() {
+        unsafe { std::env::set_var("DAISYCAP_TEST_KNOB", "new") };
+        assert_eq!(env("DAISYCAP_TEST_KNOB").as_deref(), Some("new"));
+        unsafe { std::env::remove_var("DAISYCAP_TEST_KNOB") };
+        unsafe { std::env::set_var("GIMBAL_TEST_KNOB", "old") };
+        assert_eq!(env("DAISYCAP_TEST_KNOB").as_deref(), Some("old"));
+        assert_eq!(env_os("DAISYCAP_TEST_KNOB"), Some("old".into()));
+        unsafe { std::env::remove_var("GIMBAL_TEST_KNOB") };
+        assert_eq!(env("DAISYCAP_TEST_KNOB"), None);
+    }
+}

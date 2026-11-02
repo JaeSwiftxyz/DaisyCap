@@ -1,0 +1,201 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f5f7;
+  --card: #ffffff;
+  --fg: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgba(0, 0, 0, 0.08);
+  --link: #0a6cff;
+  --accent: #f0b429;
+  --accent-soft: #fbe7b0;
+  --lane: #e8e8ed;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a { color: var(--link); }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.92em; }
+
+:focus-visible { outline: 3px solid var(--link); outline-offset: 3px; border-radius: 6px; }
+
+.skip {
+  position: absolute; left: 12px; top: -48px; padding: 8px 12px;
+  background: var(--card); color: var(--fg); border-radius: 8px; z-index: 10;
+}
+.skip:focus { top: 12px; }
+
+.wrap { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+
+/* Header */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px max(20px, calc((100% - 1080px) / 2));
+  background: rgba(245, 245, 247, 0.82);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.top .brand {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--display); font-weight: 650; color: var(--fg); text-decoration: none; letter-spacing: -0.01em;
+}
+.top .logo { width: 28px; height: 28px; flex: none; }
+.top .brand:hover .logo, .top .brand:focus-visible .logo { animation: spin 2.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.top nav { display: flex; gap: 18px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+.top nav a:hover { color: var(--fg); }
+
+/* Hero */
+.hero { padding: clamp(48px, 8vw, 104px) 0 clamp(40px, 6vw, 80px); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero-copy, .shot { min-width: 0; }
+.shot img { width: 100%; height: auto; }
+h1 {
+  margin: 0 0 18px; font-family: var(--display); font-weight: 700;
+  font-size: clamp(2.3rem, 5.4vw, 3.9rem); line-height: 1.04; letter-spacing: -0.03em;
+}
+h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 650; font-size: clamp(1.8rem, 3.6vw, 2.5rem); line-height: 1.1; letter-spacing: -0.02em; }
+h3 { margin: 0 0 6px; font-size: 1.12rem; font-weight: 620; letter-spacing: -0.01em; }
+.lead { margin: 0 0 26px; color: var(--muted); font-size: clamp(1.05rem, 1.8vw, 1.22rem); max-width: 34em; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.meta { margin: 22px 0 0; color: var(--muted); font-size: 14px; }
+.shot {
+  margin: 0; border-radius: 18px; overflow: hidden; background: var(--card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 24px 60px -24px rgba(0, 0, 0, 0.22);
+}
+
+/* Buttons: only transform moves; colour changes snap */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 10px 20px; border-radius: 999px;
+  font: inherit; font-weight: 580; text-decoration: none; cursor: pointer;
+  border: 1px solid transparent; transition: transform 120ms ease-out;
+}
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--accent); color: #1d1d1f; box-shadow: 0 8px 24px -10px rgba(240, 180, 41, 0.9); }
+.btn.primary:hover { background: #f5c04a; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: rgba(0, 0, 0, 0.14); }
+.btn.ghost:hover { background: rgba(0, 0, 0, 0.04); }
+.btn.small { min-height: 34px; padding: 6px 14px; font-size: 14px; }
+
+/* Bands and sections */
+section { padding: clamp(56px, 9vw, 112px) 0; }
+.band { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+
+/* Replay of a cut. The cut state is the default, so the page reads right without JavaScript. */
+.replay {
+  position: absolute; inset: 0; margin: 0; padding: clamp(14px, 2.6vw, 24px);
+  border: 0; border-radius: 0; background: var(--bg);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.replay .words { font-size: clamp(1rem, 2.2vw, 1.25rem); }
+.replay .track { margin-top: 18px; height: 40px; }
+.replay .replay-btn { position: absolute; right: 12px; bottom: 12px; }
+.words { margin: 0; font-size: clamp(1.25rem, 2.6vw, 1.6rem); line-height: 1.7; font-family: var(--display); letter-spacing: -0.01em; }
+.w { position: relative; display: inline-block; margin-right: 0.22em; }
+.w.cut { color: var(--muted); }
+.w.cut::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 56%; height: 2px;
+  background: currentColor; transform: scaleX(1); transform-origin: left center;
+}
+.track { display: flex; height: 46px; margin-top: 22px; border-radius: 10px; overflow: hidden; background: var(--lane); }
+.clip { display: block; height: 100%; }
+.keep-a { flex: 0 0 30%; background: var(--accent); }
+.gap {
+  flex: 0 0 22%; transform: scaleX(0); transform-origin: left center;
+  background: repeating-linear-gradient(135deg, #e4e4e8 0 8px, #f1f1f4 8px 16px);
+}
+/* -45.83% of this clip's own width is the 22% gap, for when no JavaScript sets --shift. */
+.keep-b { flex: 0 0 48%; background: var(--accent-soft); transform: translateX(var(--shift, -45.83%)); }
+.replay-btn { display: none; }
+
+/* Feature cards */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+@media (min-width: 700px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.card {
+  position: relative; isolation: isolate; display: flex; flex-direction: column;
+  margin: 0; padding: 22px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--line);
+}
+.card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+  box-shadow: 0 16px 36px -18px rgba(0, 0, 0, 0.25); opacity: 0; transition: opacity 160ms ease;
+}
+.card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+.card:hover::before { opacity: 1; }
+.card-picture {
+  position: relative; aspect-ratio: 16 / 10; margin: 0 0 16px; overflow: hidden;
+  border-radius: 12px; background: var(--lane);
+}
+.card-picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.also { margin: 28px 0 0; color: var(--muted); font-size: 15.5px; }
+
+/* Download */
+.download p { color: var(--muted); }
+.download .btn { margin: 6px 0 20px; }
+.fine { font-size: 14.5px; max-width: 40em; }
+
+/* Footer */
+.foot { padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+.foot p { margin: 0; }
+
+/* Small screens: the header keeps Features and Download */
+@media (max-width: 520px) {
+  .top nav { gap: 14px; }
+}
+
+/* Wide screens */
+@media (min-width: 860px) {
+  .hero-grid { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 56px; }
+}
+
+/* Entrances start hidden only when JavaScript runs, so the page reads without it */
+.js .reveal {
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 240ms ease-out var(--d, 0ms), transform 240ms ease-out var(--d, 0ms);
+}
+.js .reveal.is-in { opacity: 1; transform: none; }
+.js .shot.reveal { transform: scale(0.98); }
+.js .shot.reveal.is-in { transform: none; }
+.js .card.reveal.is-in:hover { transform: translateY(-2px); transition: transform 160ms ease, opacity 240ms ease-out; }
+
+/* Replay: with JavaScript and motion allowed, the cut opens, then closes once per loop */
+@media (prefers-reduced-motion: no-preference) {
+  .js .replay .w.cut::after { transform: scaleX(0); }
+  .js .replay .gap { transform: scaleX(1); }
+  .js .replay .keep-b { transform: translateX(0); }
+  .js .replay-btn { display: inline-flex; }
+  .js .replay.play .w.cut::after { animation: strike 240ms ease-out 180ms forwards; }
+  .js .replay.play .gap { animation: close 280ms ease-in-out 420ms forwards; }
+  .js .replay.play .keep-b { animation: slide 280ms ease-in-out 420ms forwards; }
+}
+@keyframes strike { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes close { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes slide { from { transform: translateX(0); } to { transform: translateX(var(--shift, -45.83%)); } }
+
+/* Reduced motion: nothing moves or fades, and the final states show */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  .js .card.reveal.is-in:hover { transform: none; }
+  .card:hover::before { opacity: 1; }
+  .btn:active { transform: none; }
+}

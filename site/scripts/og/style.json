@@ -1,0 +1,7 @@
+{
+	"style": {
+		"background": { "type": "wallpaper", "id": "aurora" },
+		"padding": 9.0,
+		"corner_radius": 20.0
+	}
+}

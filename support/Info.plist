@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.daisycap.app</string>
+	<key>CFBundleName</key>
+	<string>DaisyCap</string>
+	<key>CFBundleDisplayName</key>
+	<string>DaisyCap</string>
+	<!-- The app menu's About, Hide and Quit items take the executable's name. -->
+	<key>CFBundleExecutable</key>
+	<string>DaisyCap</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<!-- Both match the version in Cargo.toml; Sparkle compares CFBundleVersion with the feed's. -->
+	<key>CFBundleShortVersionString</key>
+	<string>0.2.4</string>
+	<key>CFBundleVersion</key>
+	<string>0.2.4</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 JaeSwift</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.video</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<!-- Never throttle the recorder or exporter when no window is visible. -->
+	<key>LSAppNapIsDisabled</key>
+	<true/>
+	<!-- Keep macOS camera reactions (balloons etc.) out of the camera bubble. -->
+	<key>NSCameraReactionEffectGesturesEnabledDefault</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>DaisyCap records your camera into a bubble over your screen recordings.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>DaisyCap records your microphone for voice-over and captions.</string>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>DaisyCap records your screen and system audio.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>DaisyCap transcribes your microphone on this Mac to create captions.</string>
+	<!-- Sparkle, embedded by scripts/release-macos.sh, checks this feed once a day and installs
+	     only updates signed with the private half of this key, which `generate_keys --account daisycap`
+	     keeps in the release Mac's login keychain. Every release must be signed with the same key. -->
+	<key>SUFeedURL</key>
+	<string>https://jaeswift.xyz/daisycap/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>ZqDYrtcARcIrrcFCro5sAEbPJRmKea5dkApvoDVSMgg=</string>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>DaisyCap Project</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.daisycap.app</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.daisycap.app</string>
+			<key>UTTypeDescription</key>
+			<string>DaisyCap Project</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>daisycap</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

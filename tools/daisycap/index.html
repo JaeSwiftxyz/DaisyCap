@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DaisyCap: a screen recorder and editor for Mac</title>
+<meta name="description" content="DaisyCap is a screen recorder and editor for Mac. Record, add zooms and captions, export an MP4 or GIF, and share a link.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://jaeswift.xyz/tools/daisycap/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DaisyCap">
+<meta property="og:title" content="DaisyCap: a screen recorder and editor for Mac">
+<meta property="og:description" content="A screen recorder and editor for Mac, with zooms, captions, backgrounds and share links.">
+<meta property="og:url" content="https://jaeswift.xyz/tools/daisycap/">
+<meta property="og:image" content="https://jaeswift.xyz/tools/daisycap/img/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="brand" href="#top" aria-label="DaisyCap home"><img class="logo" src="img/daisy.webp" width="28" height="28" alt="">DaisyCap</a>
+  <nav aria-label="Page">
+    <a href="#features">Features</a>
+    <a href="#download">Download</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 class="reveal" data-reveal data-delay="60">A screen recorder and editor for Mac.</h1>
+        <p class="lead reveal" data-reveal data-delay="120">DaisyCap records your screen, adds zooms and captions, and exports an MP4 or GIF. Recordings stay on your Mac unless you share one.</p>
+        <div class="actions reveal" data-reveal data-delay="180">
+          <a class="btn primary" href="https://jaeswift.xyz/daisycap/releases/latest/download/DaisyCap.dmg">Download for macOS</a>
+          <a class="btn ghost" href="#features">See the features</a>
+        </div>
+        <p class="meta reveal" data-reveal data-delay="240">Version 0.2.4 · macOS 14 or later · Apple Silicon and Intel</p>
+      </div>
+      <figure class="shot reveal" data-reveal data-delay="120">
+        <img src="img/hero.webp" width="1200" height="760" alt="DaisyCap's Background tab in light mode, with a demo recording on an ember wallpaper.">
+      </figure>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <h2 class="reveal" data-reveal>What is in the app</h2>
+      <div class="grid">
+        <article class="card reveal" data-reveal data-delay="0">
+          <figure class="card-picture">
+            <img src="img/record.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The recording setup, with display, window and area choices, a camera bubble, and audio switches.">
+          </figure>
+          <h3>Record</h3>
+          <p>Capture a display, a window or an area, with system audio and your mic.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="40">
+          <figure class="card-picture">
+            <img src="img/zoom.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The zoom inspector, with the preview zoomed to 2 times and a numbered callout with arrows on screen.">
+          </figure>
+          <h3>Zooms and callouts</h3>
+          <p>Zooms follow your clicks. Callouts add arrows, boxes and numbered steps.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="80">
+          <div class="card-picture">
+            <div class="replay" data-replay>
+              <p class="words" aria-hidden="true">
+                <span class="w">Here's</span>
+                <span class="w">a</span>
+                <span class="w cut">quick</span>
+                <span class="w cut">tour</span>
+                <span class="w">of</span>
+                <span class="w">the</span>
+                <span class="w">new</span>
+                <span class="w">dashboard.</span>
+              </p>
+              <div class="track" aria-hidden="true">
+                <span class="clip keep-a"></span>
+                <span class="clip gap"></span>
+                <span class="clip keep-b"></span>
+              </div>
+              <button class="btn ghost small replay-btn" type="button">Replay</button>
+            </div>
+          </div>
+          <h3>Delete words to cut</h3>
+          <p>Select words in the captions and press Delete. The video cuts there, and the gap closes.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="120">
+          <figure class="card-picture">
+            <img src="img/captions.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The Captions tab, with the transcript as editable words and the Save .srt and Save .vtt buttons.">
+          </figure>
+          <h3>Captions</h3>
+          <p>Whisper or Apple's speech engine transcribes the audio. Edit the lines, then save .srt or .vtt.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="160">
+          <figure class="card-picture">
+            <img src="img/backgrounds.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The Background tab with the aurora wallpaper, padding and a laptop frame around the recording.">
+          </figure>
+          <h3>Backgrounds and frames</h3>
+          <p>Wallpapers, gradients and padding, with laptop, phone and tablet frames.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="200">
+          <figure class="card-picture">
+            <img src="img/audio.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The clip inspector, with speed choices from 0.25 to 8 times and an Ease speed switch.">
+          </figure>
+          <h3>Silence and speed</h3>
+          <p>Cut silences, speed up typing, and ease a clip's speed in and out.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="240">
+          <figure class="card-picture">
+            <img src="img/export.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The export sheet, with social presets, the All three shapes button, GIF or MP4 format, and codec choices.">
+          </figure>
+          <h3>Export</h3>
+          <p>Save an MP4 or a GIF, or export 16:9, square and vertical in one go.</p>
+        </article>
+        <article class="card reveal" data-reveal data-delay="280">
+          <figure class="card-picture">
+            <img src="img/share.webp" width="1200" height="760" loading="lazy" decoding="async" alt="The Share link window, with a handle field and the line that links last one hour.">
+          </figure>
+          <h3>Share</h3>
+          <p>Upload an export and copy a link. Links last one hour, then the video is deleted.</p>
+        </article>
+      </div>
+      <p class="also reveal" data-reveal>Also in the app: blur masks, click and keyboard sounds, importing MP4 and MOV files, an end card, and a shortcut overlay.</p>
+    </div>
+  </section>
+
+  <section class="band download" id="download">
+    <div class="wrap">
+      <h2 class="reveal" data-reveal>Download DaisyCap</h2>
+      <p class="reveal" data-reveal>Version 0.2.4 for macOS 14 or later, on Apple Silicon and Intel.</p>
+      <div class="reveal" data-reveal data-delay="60">
+        <a class="btn primary" href="https://jaeswift.xyz/daisycap/releases/latest/download/DaisyCap.dmg">Download DaisyCap.dmg</a>
+      </div>
+      <p class="fine reveal" data-reveal data-delay="120">This build isn't notarized by Apple, so macOS stops the first launch. Open System Settings, go to Privacy &amp; Security, and choose Open Anyway. This version doesn't check for updates by itself. To update, download the newer DMG from this page.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Made in DaisyCap. © 2026 JaeSwift.</p>
+  </div>
+</footer>
+</body>
+</html>
