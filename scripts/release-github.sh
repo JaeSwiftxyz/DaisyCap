@@ -25,7 +25,7 @@ repo="JaeSwiftxyz/DaisyCap"
 if [ "$local" = 0 ]; then
     [ "$(git branch --show-current)" = "main" ] || { echo "switch to main first" >&2; exit 1; }
     command -v gh >/dev/null || { echo "gh is not installed" >&2; exit 1; }
-    gh auth status >/dev/null 2>&1 || { echo "gh is not logged in" >&2; exit 1; }
+    gh auth status --active >/dev/null 2>&1 || { echo "gh is not logged in" >&2; exit 1; }
     if gh release view "$tag" --repo "$repo" --json tagName >/dev/null 2>&1; then
         echo "release $tag already exists" >&2
         exit 1
