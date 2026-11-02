@@ -1,6 +1,6 @@
 # DaisyCap download page
 
-The download page for DaisyCap, an open-source screen recorder for the Mac. One prerendered SvelteKit page plus a `/download` redirect, deployed on Vercel. Run the commands below from this folder.
+The download page for DaisyCap, an open-source screen recorder for the Mac. One prerendered SvelteKit page plus a `/download` redirect, built for Vercel. It isn't live: the live page is https://jaeswift.xyz/tools/daisycap. Run the commands below from this folder.
 
 ## Develop
 
@@ -35,7 +35,9 @@ The demo and the feature cards are HTML and CSS recreations of DaisyCap's interf
 
 ## Deploy
 
-Import the repo as a Vercel project with the SvelteKit preset and set the Root Directory to `site`. No environment variables are needed. The canonical, Open Graph and JSON-LD URLs are built from `origin` in `src/lib/site.ts`, so every build, including previews and local builds, points them at `https://jaeswift.xyz/daisycap`. `static/robots.txt` and `static/sitemap.xml` spell out the same domain, so update them too if it changes.
+This page isn't live. The live page is https://jaeswift.xyz/tools/daisycap, the tools page served from the VPS by `server/tools-daisycap/deploy.sh`.
+
+To host this page as well, import the repo as a Vercel project with the SvelteKit preset and set the Root Directory to `site`. No environment variables are needed. The canonical, Open Graph and JSON-LD URLs are built from `origin` in `src/lib/site.ts`, so every build, including previews and local builds, points them at `https://jaeswift.xyz/daisycap`. `static/robots.txt` and `static/sitemap.xml` spell out the same domain, so update them too if it changes.
 
 ## Analytics
 

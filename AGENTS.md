@@ -1,6 +1,6 @@
 # Agent workflow
 
-This repo holds DaisyCap, a native macOS screen recorder written in Rust, and its download page in `site/`. Pick the parts of this workflow that fit the task. The workflow and its skills live on the `agent-notes` branch, since `main` keeps only the app.
+This repo holds DaisyCap, a native macOS screen recorder written in Rust, and its download page in `site/`. Pick the parts of this workflow that fit the task. The workflow and its skills live on the `agent-notes` branch, since `main` keeps only the app. The repo lives on GitHub at `JaeSwiftxyz/DaisyCap`, and `gh` is logged in for it.
 
 - Read-only reviews, explanations and investigations need no worktree or commit. If an investigation turns into edits, isolate those edits.
 - Code and copy changes get isolation, the checks below, and evidence of what changed. For a bug, capture the failure before fixing it.
@@ -12,14 +12,14 @@ This repo holds DaisyCap, a native macOS screen recorder written in Rust, and it
 1. **Isolate.** Use `/new-feature` before editing, and branch from `origin/main`. The main checkout is synced to four other machines with Mutagen, so don't add worktrees, `node_modules` or build output there. Work in a fresh clone at `~/Desktop/daisycap-worktrees/<task-name>` on a branch named `agent/<task-name>`, and run `npm install` in its `site/` before site checks.
 2. **Build.** Follow the layout in the README. The app lives in `src/`, with the frame model in `src/engine`, and the download page lives in `site/`. Reach for `/code-structure` when the same operational logic shows up in more than one flow.
 3. **Prove.** Run the checks below for the part you changed. Use `/evidence-driven-testing` when behavior changes. For visible site changes, check desktop width and 390 px in light and dark, and keep the screenshots.
-4. **Ship.** Open a PR against `main` on Gitea, through the Gitea API (`gh` only reaches GitHub). Add a before and after table for visible changes, with the images attached to the PR. `/greploop` doesn't support Gitea, so it doesn't run. Say so in the PR, and report the review you did instead.
+4. **Ship.** Open a PR against `main` with `gh pr create`. Add a before and after table for visible changes, and attach the images through the GitHub web UI. Run `/greploop` for code changes, and aim for 5/5 with no unresolved actionable findings on the current commit. Stop at the iteration cap, a review timeout or an unavailable integration, and report the real score and what's left.
 
 ## Project rules
 
 - Commit messages follow the repo's style, `type(scope): lowercase summary`, such as `feat(app): ...`, `fix(audio): ...` or `docs: ...`.
 - Keep build output out of the repo. `scripts/env.sh` puts Cargo's target directory in `~/.cache/cargo-target/daisycap`, and test output goes to `~/Movies/daisycap-tests`.
 - Screenshots and demos come from DaisyCap's synthetic recordings (`daisycap synth`), never from a real desktop.
-- Don't deploy to Vercel, create Vercel projects, publish GitHub releases or push tags unless the owner asks.
+- Don't deploy the site, publish releases or push tags unless the owner asks. Releases go through `scripts/release-github.sh`, which builds the DMG and zip, checksums both, and publishes with `gh release create`.
 - The download page claims only what the app ships. Check a feature in `src/` before the page mentions it.
 - The page's only analytics is Vercel Web Analytics, which sets no cookies and stores no personal data. Don't add other analytics, tracking or third-party scripts.
 
@@ -31,7 +31,7 @@ Run `/unslop` over anything a person will read before you commit, post or send i
 
 - Never commit directly to `main`.
 - One clone or worktree and one branch per task and per agent. Never reuse or change another agent's checkout, branch or uncommitted work.
-- Before starting, list the open PRs with `GET /api/v1/repos/JaeSwift/DaisyCap/pulls?state=open`, check each one's changed files with `GET /api/v1/repos/JaeSwift/DaisyCap/pulls/<n>/files`, and look for uncommitted work in shared checkouts without changing it. Independent edits to the same file can go ahead in your own checkout. Ask only when changes conflict in behavior, depend on unfinished work, or ownership is unclear.
+- Before starting, list the open PRs with `gh pr list`, check each PR's changed files with `gh pr diff <n> --name-only`, and look for uncommitted work in shared checkouts without changing it. Independent edits to the same file can go ahead in your own checkout. Ask only when changes conflict in behavior, depend on unfinished work, or ownership is unclear.
 - Never use plain `--force`. Use `--force-with-lease`, and only on your own task branch.
 - Resolve `Cargo.lock` and `site/package-lock.json` conflicts by regenerating them, never by hand-merging.
 - Every checkout and repo on this Mac shares the same ports, `/tmp` and Cargo target directory. Confirm a preview port answers your process before trusting what it serves, and put scratch files in `mktemp -d` directories instead of fixed `/tmp` paths.
@@ -44,7 +44,7 @@ Run `/unslop` over anything a person will read before you commit, post or send i
 3. Collect the evidence: screenshots for visible changes, command output for the rest.
 4. Commit with a clear message, rebase onto the latest `origin/main`, and rerun the checks.
 5. Push with `git push -u origin <branch>` and open a PR. The body says what changed, how you tested it with evidence for each claim, before and after proof, and any risks or follow-up.
-6. `/greploop` doesn't support Gitea, so skip it, and say so in the PR.
+6. Run `/greploop` on the PR when it applies.
 
 Don't merge unless the owner asks. Keep the clone until the PR is merged or closed.
 
@@ -72,4 +72,4 @@ For every change, `git diff --check` catches whitespace errors. Keep generated e
 
 The workflow skills live on the `agent-notes` branch, in `.agents/skills`, which Cursor and Codex read; `.claude/skills` holds symlinks for Claude Code. Copy them into a checkout when you need them: `git fetch origin agent-notes && git checkout agent-notes -- .agents .claude`. Update them on that branch with `npx skills update -p`, then review the diff before committing, since skills run with full agent permissions.
 
-`/before-and-after` uploads to 0x0.st by default, which is public, and 0x0.st refused uploads in November 2026. Attach the images to the Gitea PR instead: `POST /api/v1/repos/JaeSwift/DaisyCap/issues/<n>/assets` with a multipart `attachment` field, then link the `browser_download_url` it returns.
+`/before-and-after` uploads to 0x0.st by default, which is public, and 0x0.st refused uploads in November 2026. Attach the images through the GitHub web UI instead.

@@ -80,6 +80,10 @@ open dist/DaisyCap.app
 Build output goes to `~/.cache/cargo-target/daisycap` (override with
 `CARGO_TARGET_DIR`), never into the repository.
 
+`scripts/release-github.sh --local` builds a DMG and a zip in `dist/` with
+checksums, so you can try them. Without `--local` it publishes them as a
+GitHub release.
+
 `scripts/release-macos.sh` builds the universal (Apple Silicon + Intel) app for
 macOS 14 and later, signs it with a Developer ID certificate, notarizes it and
 packages `DaisyCap.dmg`, plus the zip and signed `appcast.xml` that installed
