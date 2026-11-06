@@ -2,7 +2,7 @@
 
 DaisyCap is a native Mac screen recorder in Rust. It records a display, a window, an area or an iPhone, and exports MP4 or GIF. The aim is a fast, private recorder: recordings stay on the Mac unless you share one.
 
-Contributions are welcome. One rule matters above the rest: the app is free and nothing in it is locked. Don't add a paid tier, a licence key or a Pro badge. The watermark and end credit stay plain toggles.
+Actively looking for contributions to help get DaisyCap to its 1.0 release. 
 
 ## Setup
 
