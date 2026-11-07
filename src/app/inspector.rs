@@ -804,7 +804,7 @@ fn animation(ui: &mut Ui, ed: &mut Editor, d: &mut Project) {
         if on {
             slider(ui, "Length", &mut d.style.transition_ms, 60.0..=600.0, " ms");
         }
-        caption(ui, "Between clips, the video dips to the background and back, so a jump cut feels intentional.");
+        caption(ui, "When a cut jumps the recording, the video dips to the background and back, so the jump feels intentional. A plain split stays seamless.");
     });
     section(ui, "Motion blur", |ui| {        let m = &mut d.style.motion_blur;
         slider(ui, "Amount", &mut m.amount, 0.0..=1.0, "");
