@@ -11,6 +11,11 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// What's new in this version, newest first.
 pub const NOTES: &[(&str, &[&str])] = &[(
+    "0.2.5",
+    &[
+        "Splitting a clip joins the halves seamlessly, and the dip at cuts only plays where the recording jumps.",
+    ],
+), (
     "0.2.4",
     &[
         "Share links: upload an export to jaeswift.xyz and copy its link, jaeswift.xyz/daisycap/<you>/<video>. Claim your handle once; it stays with this Mac.",

@@ -806,11 +806,14 @@ impl Scene {
             };
         }
 
-        // A dip to the background at each cut, when transitions are on.
+        // A dip to the background where the recording jumps at a cut, when
+        // transitions are on. At a plain split the recording is continuous, so
+        // the halves join seamlessly and nothing dips.
+        const JUMP_MS: f64 = 1.0;
         if style.transition_ms > 0.5 && self.map.links.len() > 1 {
             let half = style.transition_ms;
             for w in self.map.links.windows(2) {
-                if w[0].slice != w[1].slice {
+                if w[0].slice != w[1].slice && (w[1].src_start - w[0].src_end).abs() > JUMP_MS {
                     let d = (pb - w[1].pb_start).abs();
                     frame.window_alpha = frame.window_alpha.min((d / half).clamp(0.0, 1.0));
                 }
@@ -1008,6 +1011,22 @@ mod tests {
         let mut s = Scene::new(p, &rec, 60.0);
         assert!(s.frame(3000.0, 1080.0).window_alpha < 0.05, "dips at the cut");
         assert!(s.frame(2000.0, 1080.0).window_alpha > 0.9, "opaque away from it");
+    }
+
+    #[test]
+    fn a_split_stays_seamless_with_transitions_on() {
+        let rec = recording();
+        let mut p = Project::default();
+        // A split: the halves meet with no frames jumped in between.
+        p.timeline.slices = vec![
+            Slice { id: 1, start: 0.0, end: 3000.0, ..Default::default() },
+            Slice { id: 2, start: 3000.0, end: 6000.0, ..Default::default() },
+        ];
+        p.style.transition_ms = 200.0;
+        let mut s = Scene::new(p, &rec, 60.0);
+        assert!(s.frame(3000.0, 1080.0).window_alpha > 0.99, "no dip at the split");
+        assert!(s.frame(2900.0, 1080.0).window_alpha > 0.99, "nor just before it");
+        assert!(s.frame(3100.0, 1080.0).window_alpha > 0.99, "nor just after it");
     }
 
     #[test]

@@ -48,6 +48,10 @@ Download **DaisyCap-$version.dmg**, or the **.zip** if you prefer a zip.
 
 The app is ad-hoc signed and not notarized, so macOS stops the first launch. Open System Settings, go to Privacy & Security, and choose Open Anyway. After that it opens normally.
 
+If you would rather use the terminal, move DaisyCap to Applications and run:
+
+    xattr -dr com.apple.quarantine /Applications/DaisyCap.app
+
 This version does not check for updates by itself.
 
 SHA256SUMS-$version.txt has the checksums for both downloads.

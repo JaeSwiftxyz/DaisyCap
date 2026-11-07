@@ -1,4 +1,4 @@
-export const version = '0.2.4';
+export const version = '0.2.5';
 // From support/Info.plist: LSMinimumSystemVersion is 14.0. scripts/release-macos.sh builds one
 // universal app for both chips.
 export const macos = 'macOS 14 or later';
