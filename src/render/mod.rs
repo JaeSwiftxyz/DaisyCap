@@ -709,7 +709,7 @@ impl Renderer {
             d.p0 = [arm.width as f32, arm.width as f32, 0.0, arm.alpha as f32];
             d.p3 = [arm.from.x as f32, arm.from.y as f32, arm.to.x as f32, arm.to.y as f32];
             d.p4 = [art::HAND_SLEEVE[0], art::HAND_SLEEVE[1], art::HAND_SLEEVE[2], 1.0];
-            d.out[3] = 1.0;
+            d.out[3] = 2.0;
             main.push((d, TexId::Dummy));
         }
 

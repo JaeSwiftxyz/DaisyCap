@@ -492,9 +492,10 @@ fn mode_fill(local: vec2<f32>) -> vec4<f32> {
     return premul(vec4<f32>(c.rgb, c.a * cov * d.p0.w));
 }
 
-// Callout: a rounded box outline, or an arrow along p3 (x0,y0 → x1,y1).
+// Callout: a rounded box outline, an arrow along p3 (x0,y0 → x1,y1), or a
+// flat-ended shaft along p3.
 // p0 = (thickness px, head px, corner px, opacity), p4 = colour.
-// out.w: 0 = box, 1 = arrow.
+// out.w: 0 = box, 1 = arrow, 2 = flat shaft.
 fn mode_callout(local: vec2<f32>) -> vec4<f32> {
     let thickness = max(d.p0.x, 1.0);
     var dist: f32;
@@ -502,7 +503,7 @@ fn mode_callout(local: vec2<f32>) -> vec4<f32> {
         let half = d.shape.zw * 0.5;
         let sd = sd_round_rect(local, d.shape.xy + half, half, d.p0.z);
         dist = abs(sd) - thickness * 0.5;
-    } else {
+    } else if d.out.w < 1.5 {
         let a = d.p3.xy;
         let b = d.p3.zw;
         let pa = local - a;
@@ -521,6 +522,18 @@ fn mode_callout(local: vec2<f32>) -> vec4<f32> {
         let inv = 1.0 / sqrt(1.0 + slope * slope);
         let dhead = max(max(-t, t - head), max((s - slope * t) * inv, (-s - slope * t) * inv));
         dist = min(shaft, dhead);
+    } else {
+        // A flat shaft: an oriented rectangle, square at both ends.
+        let a = d.p3.xy;
+        let b = d.p3.zw;
+        let ba = b - a;
+        let len = max(length(ba), 1e-3);
+        let dirn = ba / len;
+        let perp = vec2<f32>(-dirn.y, dirn.x);
+        let rel = local - a;
+        let s = dot(rel, dirn);
+        let t = dot(rel, perp);
+        dist = max(max(-s, s - len), abs(t) - thickness * 0.5);
     }
     let cov = coverage(dist);
     if cov <= 0.0 {
