@@ -223,13 +223,13 @@ pub fn hand_cursor() -> (Image, Vec2, f64) {
 
     // The silhouette: finger, palm, three curled knuckles, thumb, wrist stub.
     let hand = |p: Vec2| -> f64 {
-        let mut d = seg_dist(p, tip, v2(6.6, 9.4)) - 2.3;
-        d = d.min(round_rect(p, v2(4.6, 6.6), v2(11.0, 7.2), 3.6));
+        let mut d = seg_dist(p, tip, v2(6.5, 9.5)) - 2.15;
+        d = d.min(round_rect(p, v2(4.4, 6.4), v2(11.6, 7.6), 3.8));
         for i in 0..3 {
-            let x = 10.2 + i as f64 * 2.0;
-            d = d.min(seg_dist(p, v2(x, 5.6), v2(x + 1.4, 9.6)) - 1.9);
+            let x = 9.9 + i as f64 * 1.9;
+            d = d.min(seg_dist(p, v2(x, 5.4), v2(x + 1.4, 9.6)) - 2.05);
         }
-        d.min(seg_dist(p, v2(4.4, 9.6), v2(1.6, 13.4)) - 2.0).min(round_rect(p, v2(5.2, 13.4), v2(8.2, 3.4), 1.8))
+        d.min(seg_dist(p, v2(4.4, 9.6), v2(1.6, 13.4)) - 2.15).min(round_rect(p, v2(5.2, 13.4), v2(8.6, 3.6), 1.9))
     };
     let skin = [0.906, 0.706, 0.561];
     let shade = [0.831, 0.604, 0.451];

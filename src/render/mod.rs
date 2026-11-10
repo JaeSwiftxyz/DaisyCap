@@ -662,6 +662,32 @@ impl Renderer {
         }
         }
 
+        // The hand skin's sleeve: over the window, under the cursor and the
+        // click effects. It runs past the frame edge, so the frame cuts it.
+        if let Some(arm) = &frame.arm
+            && arm.alpha > 0.002
+        {
+            let seg = arm.to - arm.from;
+            let dir = v2(seg.x / seg.length(), seg.y / seg.length());
+            let cuff_len = arm.width * 0.9;
+            let mut shaft = |from: Vec2, to: Vec2, thick: f64, head: f64, color: [f32; 3]| {
+                let (min, max) = (from.min(to), from.max(to));
+                let pad = thick + 2.0;
+                let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
+                let mut d = Draw::new(MODE_CALLOUT, rect, size);
+                d.p0 = [thick as f32, head as f32, 0.0, arm.alpha as f32];
+                d.p3 = [from.x as f32, from.y as f32, to.x as f32, to.y as f32];
+                d.p4 = [color[0], color[1], color[2], 1.0];
+                d.out[3] = 1.0;
+                main.push((d, TexId::Dummy));
+            };
+            let wrist = arm.from;
+            shaft(wrist, wrist + dir * cuff_len, arm.width * 1.25, arm.width * 0.5, [0.949, 0.945, 0.933]);
+            shaft(wrist + dir * (cuff_len * 0.4), arm.to, arm.width, arm.width * 0.4, [0.125, 0.129, 0.153]);
+            let edge = v2(dir.y, -dir.x) * (arm.width * 0.28);
+            shaft(wrist + dir * (cuff_len * 0.5) + edge, arm.to + edge, arm.width * 0.5, arm.width * 0.2, [0.227, 0.231, 0.267]);
+        }
+
         // Click circles under the cursor.
         for c in &frame.circles {
             let r = c.radius.max(0.5);

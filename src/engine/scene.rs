@@ -79,7 +79,7 @@ const ARM_DEG: f64 = 48.0;
 /// Where the wrist sits from the fingertip, in hand heights (x right, y down).
 const ARM_WRIST: Vec2 = v2(0.18, 0.72);
 /// Sleeve thickness in hand heights.
-const ARM_WIDTH: f64 = 0.50;
+const ARM_WIDTH: f64 = 0.56;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CircleFx {
