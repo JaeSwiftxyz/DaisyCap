@@ -14,8 +14,9 @@ use super::sizes::Sizes;
 use super::spring::SpringConfig;
 use super::timemap::TimeMap;
 use super::zoom;
-use crate::project::model::{CalloutKind, Card, ClickEffect, Color, LayoutKind, MaskKind, Project, Shadow};
+use crate::project::model::{CalloutKind, Card, ClickEffect, Color, CursorSkin, LayoutKind, MaskKind, Project, Shadow};
 use crate::project::recording::Recording;
+use crate::render::art;
 
 /// Directional or radial blur for a moving layer.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -59,6 +60,26 @@ pub struct CursorLayer {
     pub image: u32,
     pub velocity: Vec2,
 }
+
+/// The hand skin's sleeve: a line from the wrist that runs past the frame
+/// edge, so the frame cuts it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ArmLayer {
+    /// The wrist, in output pixels.
+    pub from: Vec2,
+    /// A point past the frame edge along the fixed diagonal.
+    pub to: Vec2,
+    /// Sleeve thickness in output pixels.
+    pub width: f64,
+    pub alpha: f64,
+}
+
+/// Fixed sleeve angle, degrees below horizontal, down and to the right.
+const ARM_DEG: f64 = 48.0;
+/// Where the wrist sits from the fingertip, in hand heights (x right, y down).
+const ARM_WRIST: Vec2 = v2(0.18, 0.72);
+/// Sleeve thickness in hand heights.
+const ARM_WIDTH: f64 = 0.50;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CircleFx {
@@ -169,6 +190,8 @@ pub struct Frame {
     pub backdrop_blur: f64,
     pub window: WindowLayer,
     pub cursor: Option<CursorLayer>,
+    /// The hand skin's sleeve, present with the cursor and nulled where it is.
+    pub arm: Option<ArmLayer>,
     pub circles: Vec<CircleFx>,
     pub ripples: Vec<RippleFx>,
     pub camera: Option<CameraLayer>,
@@ -429,6 +452,7 @@ impl Scene {
 
         // Cursor.
         let mut cursor = None;
+        let mut arm = None;
         let mut circles = vec![];
         let mut ripples = vec![];
         if self.has_cursor && !style.cursor.hide {
@@ -454,16 +478,28 @@ impl Scene {
             let image = Events::last_at(&self.events.all, src).map_or(0, |e| e.cursor);
             // A cursor outside the cropped screen isn't shown.
             let visible = screen_rect.inset(-2.0).contains(pos);
+            let vis_alpha = if visible { fv[0].clamp(0.0, 1.0) } else { 0.0 };
             cursor = Some(CursorLayer {
                 pos,
                 height: cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale,
                 rotation: cv[2],
-                alpha: if visible { fv[0].clamp(0.0, 1.0) } else { 0.0 },
+                alpha: vis_alpha,
                 scale: fv[1],
                 blur: fv[2].max(0.0),
                 image,
                 velocity,
             });
+            if style.cursor.skin == CursorSkin::Hand {
+                // The sleeve: steady, from the wrist past the frame edge, so
+                // the frame always cuts it. It fades with the hand.
+                let hand = cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale * art::HAND_UNITS / 20.0;
+                let rot = cv[2].to_radians();
+                let off = ARM_WRIST * hand;
+                let wrist = pos + v2(off.x * rot.cos() - off.y * rot.sin(), off.x * rot.sin() + off.y * rot.cos());
+                let a = (ARM_DEG + style.cursor.base_rotation).to_radians();
+                let dir = v2(a.cos(), a.sin());
+                arm = Some(ArmLayer { from: wrist, to: wrist + dir * (size.x + size.y), width: ARM_WIDTH * hand, alpha: vis_alpha });
+            }
             let fx_px = 16.0 * style.cursor.size * k * zoom_scale;
             match style.cursor.click_effect {
                 ClickEffect::Circle => {
@@ -729,6 +765,7 @@ impl Scene {
             backdrop_blur: backdrop * k,
             window,
             cursor,
+            arm,
             circles,
             ripples,
             camera: cam,
@@ -778,6 +815,7 @@ impl Scene {
             frame.credit = true;
             frame.card = true;
             frame.cursor = None;
+            frame.arm = None;
             frame.circles.clear();
             frame.ripples.clear();
             frame.camera = None;
@@ -823,6 +861,9 @@ impl Scene {
                 if let Some(c) = &mut frame.cursor {
                     c.alpha *= a;
                 }
+                if let Some(arm) = &mut frame.arm {
+                    arm.alpha *= a;
+                }
                 if let Some(c) = &mut frame.camera {
                     c.alpha *= a;
                 }
@@ -850,6 +891,7 @@ impl Scene {
                 let alpha = Card::alpha(local, ms);
                 frame.card = true;
                 frame.cursor = None;
+                frame.arm = None;
                 frame.circles.clear();
                 frame.ripples.clear();
                 frame.camera = None;
@@ -926,7 +968,7 @@ pub fn centre_crop(from: f64, to: f64) -> Rect {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::project::model::{Slice, Zoom};
+    use crate::project::model::{Aspect, CursorSkin, Slice, Zoom};
     use crate::project::recording::{MouseEvent, MouseKind, RecordingMeta, VideoTrack};
 
     fn recording() -> Recording {
@@ -1027,6 +1069,76 @@ mod tests {
         assert!(s.frame(3000.0, 1080.0).window_alpha > 0.99, "no dip at the split");
         assert!(s.frame(2900.0, 1080.0).window_alpha > 0.99, "nor just before it");
         assert!(s.frame(3100.0, 1080.0).window_alpha > 0.99, "nor just after it");
+    }
+
+    fn rec_with_cursor(x: f64, y: f64) -> Recording {
+        let mut r = recording();
+        r.mouse = vec![MouseEvent { t: 0.0, x, y, kind: MouseKind::Move, button: 0, cursor: 0 }];
+        r
+    }
+
+    fn hand_project() -> Project {
+        let mut p = Project::default();
+        p.style.cursor.skin = CursorSkin::Hand;
+        p
+    }
+
+    #[test]
+    fn the_sleeve_always_leaves_the_frame() {
+        for (x, y) in [(60.0, 60.0), (1860.0, 60.0), (60.0, 1020.0), (1860.0, 1020.0), (960.0, 540.0)] {
+            for aspect in [Aspect::Auto, Aspect::Ratio { w: 9, h: 16 }] {
+                let mut p = hand_project();
+                p.style.aspect = aspect;
+                let mut s = Scene::new(p, &rec_with_cursor(x, y), 60.0);
+                let f = s.frame(500.0, 1080.0);
+                let arm = f.arm.expect("the hand skin draws an arm");
+                assert!(
+                    arm.to.x < -arm.width || arm.to.x > f.size.x + arm.width || arm.to.y < -arm.width || arm.to.y > f.size.y + arm.width,
+                    "{x},{y} {aspect:?} -> {arm:?}"
+                );
+            }
+        }
+        // No arm on the other skins.
+        let mut s = Scene::new(Project::default(), &recording(), 60.0);
+        assert!(s.frame(500.0, 1080.0).arm.is_none());
+    }
+
+    #[test]
+    fn the_arm_ignores_tilt_but_follows_base_rotation() {
+        let rec = recording();
+        let dir = |s: &mut Scene, t: f64| {
+            let a = s.frame(t, 1080.0).arm.unwrap();
+            let d = a.to - a.from;
+            v2(d.x / d.length(), d.y / d.length())
+        };
+        let mut s = Scene::new(hand_project(), &rec, 60.0);
+        let (d0, d1) = (dir(&mut s, 500.0), dir(&mut s, 2500.0));
+        assert!((d0 - d1).length() < 1e-6, "a tilt never turns the arm");
+        let mut p = hand_project();
+        p.style.cursor.base_rotation = 20.0;
+        let d2 = dir(&mut Scene::new(p, &rec, 60.0), 500.0);
+        assert!((d2.y.atan2(d2.x).to_degrees() - d0.y.atan2(d0.x).to_degrees() - 20.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn the_arm_fades_with_the_hand_and_hides_on_the_credit() {
+        let mut p = hand_project();
+        p.timeline.slices = vec![Slice { id: 1, start: 0.0, end: 2000.0, hide_cursor: true, ..Default::default() }];
+        let mut s = Scene::new(p.clone(), &recording(), 60.0);
+        let f = s.frame(1000.0, 1080.0);
+        assert!(f.arm.unwrap().alpha < 0.05, "a per slice hide fades the arm");
+        p.timeline.slices.clear();
+        p.style.credit = true;
+        let mut s = Scene::new(p, &recording(), 60.0);
+        assert!(s.frame(s.duration() - 500.0, 1080.0).arm.is_none(), "the credit has no arm");
+    }
+
+    #[test]
+    fn the_sleeve_width_follows_the_hand() {
+        let mut s = Scene::new(hand_project(), &recording(), 60.0);
+        let small = s.frame(1000.0, 600.0).arm.unwrap().width;
+        let large = s.frame(1000.0, 1200.0).arm.unwrap().width;
+        assert!(large > small * 1.9, "the width scales with the hand");
     }
 
     #[test]
