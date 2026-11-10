@@ -199,9 +199,9 @@ pub fn touch_cursor() -> (Image, Vec2, f64) {
     (Image { width: s, height: s, rgba }, v2(0.5, 0.5), 1.4)
 }
 
-/// The hand's height in sprite units, so the drawn hand matches a standard
-/// arrow's height whatever the sprite's padding is.
-pub const HAND_UNITS: f64 = 20.0;
+/// The hand's height in sprite units that draws at one standard arrow's
+/// height, so the hand comes out about a third larger than the arrow.
+pub const HAND_UNITS: f64 = 15.0;
 
 /// Signed distance to a rounded rect given its min corner and size.
 fn round_rect(p: Vec2, min: Vec2, size: Vec2, r: f64) -> f64 {
@@ -210,10 +210,11 @@ fn round_rect(p: Vec2, min: Vec2, size: Vec2, r: f64) -> f64 {
     (mx * mx + my * my).sqrt() + qx.max(qy).min(0.0) - r
 }
 
-/// The hand skin: a warm hand pointing up and to the left, fingertip at the
-/// hotspot. The sprite ends at the wrist; the cuff and sleeve are the arm
-/// layer's job (see `engine::scene`). Returns the image, the hotspot and the
-/// height relative to a standard arrow.
+/// The hand skin: a flat illustration of a hand pointing up and to the left,
+/// fingertip at the hotspot, with a soft shadow and a nail. The sprite ends at
+/// the wrist; the cuff and sleeve are the arm layer's job (see
+/// `engine::scene`). Returns the image, the hotspot and the height relative to
+/// a standard arrow.
 pub fn hand_cursor() -> (Image, Vec2, f64) {
     const PX: f64 = 6.0;
     let pad = 4.0;
@@ -221,31 +222,36 @@ pub fn hand_cursor() -> (Image, Vec2, f64) {
     let units = v2(17.0, 22.0);
     let (w, h) = (((units.x + 2.0 * pad) * PX).ceil() as u32, ((units.y + 2.0 * pad) * PX).ceil() as u32);
 
-    // The silhouette: finger, palm, three curled knuckles, thumb, wrist stub.
+    // The silhouette: finger up, the fist with curled knuckles on the right,
+    // the thumb alongside, and a wide wrist stub the cuff sits under.
     let hand = |p: Vec2| -> f64 {
-        let mut d = seg_dist(p, tip, v2(6.5, 9.5)) - 2.15;
-        d = d.min(round_rect(p, v2(4.4, 6.4), v2(11.6, 7.6), 3.8));
-        for i in 0..3 {
-            let x = 9.9 + i as f64 * 1.9;
-            d = d.min(seg_dist(p, v2(x, 5.4), v2(x + 1.4, 9.6)) - 2.05);
+        let mut d = seg_dist(p, tip, v2(5.8, 6.4)) - 2.3;
+        d = d.min(round_rect(p, v2(3.4, 5.8), v2(10.4, 7.8), 3.6));
+        for (cx, cy) in [(11.6, 7.0), (13.0, 8.8), (13.2, 10.8)] {
+            d = d.min((p - v2(cx, cy)).length() - 2.1);
         }
-        d.min(seg_dist(p, v2(4.4, 9.6), v2(1.6, 13.4)) - 2.15).min(round_rect(p, v2(5.2, 13.4), v2(8.6, 3.6), 1.9))
+        d.min(seg_dist(p, v2(4.8, 9.2), v2(1.8, 12.8)) - 2.2).min(round_rect(p, v2(4.0, 13.2), v2(11.2, 3.4), 1.7))
     };
-    let skin = [0.906, 0.706, 0.561];
-    let shade = [0.831, 0.604, 0.451];
-    let outline = [0.227, 0.173, 0.133];
+    // A nail on the fingertip.
+    let nail = |p: Vec2| {
+        let q = v2((p.x - 3.9) / 1.3, (p.y + 1.0) / 1.8);
+        q.length() - 1.0
+    };
+    let light = [0.965, 0.804, 0.651];
+    let dark = [0.910, 0.714, 0.545];
+    let nail_col = [0.984, 0.890, 0.808];
     let mut rgba = Vec::with_capacity((w * h * 4) as usize);
     for y in 0..h {
         for x in 0..w {
             let p = v2((x as f64 + 0.5) / PX - pad, (y as f64 + 0.5) / PX - pad);
             let aa = 0.75 / PX;
             let cover = |d: f64| ((-d) / aa + 0.5).clamp(0.0, 1.0);
-            let shadow = cover(hand(p - v2(0.45, 0.85))) * 0.28;
-            let ring = cover(hand(p) - 0.55);
+            let shadow = cover(hand(p - v2(0.35, 0.7))) * 0.18;
             let fill = cover(hand(p));
             let t = ((p.y - tip.y) / 19.0).clamp(0.0, 1.0);
-            let col = [skin[0] + (shade[0] - skin[0]) * t, skin[1] + (shade[1] - skin[1]) * t, skin[2] + (shade[2] - skin[2]) * t];
-            // Composite premultiplied, back to front: shadow, dark ring, skin.
+            let col = [light[0] + (dark[0] - light[0]) * t, light[1] + (dark[1] - light[1]) * t, light[2] + (dark[2] - light[2]) * t];
+            let mark = cover(nail(p)) * fill;
+            // Composite premultiplied, back to front: shadow, skin, nail.
             let mut a = shadow;
             let mut c = [0.0, 0.0, 0.0];
             let over = |c: &mut [f64; 3], a: &mut f64, col: [f64; 3], cov: f64| {
@@ -254,8 +260,8 @@ pub fn hand_cursor() -> (Image, Vec2, f64) {
                 }
                 *a = cov + *a * (1.0 - cov);
             };
-            over(&mut c, &mut a, outline, ring);
             over(&mut c, &mut a, col, fill);
+            over(&mut c, &mut a, nail_col, mark);
             rgba.extend_from_slice(&[(c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8, (a * 255.0) as u8]);
         }
     }

@@ -77,9 +77,9 @@ pub struct ArmLayer {
 /// Fixed sleeve angle, degrees below horizontal, down and to the right.
 const ARM_DEG: f64 = 48.0;
 /// Where the wrist sits from the fingertip, in hand heights (x right, y down).
-const ARM_WRIST: Vec2 = v2(0.18, 0.72);
+const ARM_WRIST: Vec2 = v2(0.33, 0.95);
 /// Sleeve thickness in hand heights.
-const ARM_WIDTH: f64 = 0.56;
+const ARM_WIDTH: f64 = 0.72;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CircleFx {
@@ -492,7 +492,9 @@ impl Scene {
             if style.cursor.skin == CursorSkin::Hand {
                 // The sleeve: steady, from the wrist past the frame edge, so
                 // the frame always cuts it. It fades with the hand.
-                let hand = cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale * art::HAND_UNITS / 20.0;
+                // 20 sprite units is the hand's content height, so this is the
+                // hand as drawn, and the sleeve follows it.
+                let hand = cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale * 20.0 / art::HAND_UNITS;
                 let rot = cv[2].to_radians();
                 let off = ARM_WRIST * hand;
                 let wrist = pos + v2(off.x * rot.cos() - off.y * rot.sin(), off.x * rot.sin() + off.y * rot.cos());

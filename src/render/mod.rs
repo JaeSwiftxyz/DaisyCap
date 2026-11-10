@@ -669,7 +669,6 @@ impl Renderer {
         {
             let seg = arm.to - arm.from;
             let dir = v2(seg.x / seg.length(), seg.y / seg.length());
-            let cuff_len = arm.width * 0.9;
             let mut shaft = |from: Vec2, to: Vec2, thick: f64, head: f64, color: [f32; 3]| {
                 let (min, max) = (from.min(to), from.max(to));
                 let pad = thick + 2.0;
@@ -682,10 +681,11 @@ impl Renderer {
                 main.push((d, TexId::Dummy));
             };
             let wrist = arm.from;
-            shaft(wrist, wrist + dir * cuff_len, arm.width * 1.25, arm.width * 0.5, [0.949, 0.945, 0.933]);
-            shaft(wrist + dir * (cuff_len * 0.4), arm.to, arm.width, arm.width * 0.4, [0.125, 0.129, 0.153]);
-            let edge = v2(dir.y, -dir.x) * (arm.width * 0.28);
-            shaft(wrist + dir * (cuff_len * 0.5) + edge, arm.to + edge, arm.width * 0.5, arm.width * 0.2, [0.227, 0.231, 0.267]);
+            // A clean white cuff band, slightly proud of the grey sleeve.
+            shaft(wrist, wrist + dir * (arm.width * 0.85), arm.width * 1.06, arm.width * 0.6, [0.965, 0.963, 0.957]);
+            shaft(wrist + dir * (arm.width * 0.75), arm.to, arm.width, arm.width * 0.4, [0.290, 0.290, 0.302]);
+            let edge = v2(dir.y, -dir.x) * (arm.width * 0.30);
+            shaft(wrist + dir * (arm.width * 0.7) + edge, arm.to + edge, arm.width * 0.35, arm.width * 0.2, [0.361, 0.361, 0.373]);
         }
 
         // Click circles under the cursor.
