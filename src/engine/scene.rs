@@ -493,7 +493,8 @@ impl Scene {
                 let wrist = pos + v2(off.x * rot.cos() - off.y * rot.sin(), off.x * rot.sin() + off.y * rot.cos());
                 let a = (art::HAND_ARM_DEG + style.cursor.base_rotation).to_radians();
                 let dir = v2(a.cos(), a.sin());
-                arm = Some(ArmLayer { from: wrist, to: wrist + dir * (size.x + size.y), width: art::HAND_ARM_WIDTH * sprite, alpha: vis_alpha });
+                let from = wrist + dir * (sprite * art::HAND_ARM_START);
+                arm = Some(ArmLayer { from, to: wrist + dir * (size.x + size.y), width: art::HAND_ARM_WIDTH * sprite, alpha: vis_alpha });
             }
             let fx_px = 16.0 * style.cursor.size * k * zoom_scale;
             match style.cursor.click_effect {

@@ -204,8 +204,12 @@ pub fn touch_cursor() -> (Image, Vec2, f64) {
 /// (361 px square, fingertip near its top-left). The sleeve is its own layer,
 /// so only its geometry is repeated here, measured off the sprite.
 pub const HAND_DRAW: f64 = 2.70;
-/// The sleeve's start, angle and width, as fractions of the sprite.
+/// The sleeve's start, angle and width, as fractions of the sprite. The start
+/// sits just inside the sprite's own sleeve, and the arm draws over it, so the
+/// sprite's sleeve edge can't show as a seam.
 pub const HAND_ARM_FROM: Vec2 = v2(0.523, 0.634);
+/// How far along the sleeve the arm starts, past `HAND_ARM_FROM`.
+pub const HAND_ARM_START: f64 = 0.10;
 pub const HAND_ARM_DEG: f64 = 60.0;
 pub const HAND_ARM_WIDTH: f64 = 0.355;
 /// The sleeve's grey, matching the sprite's cuff.

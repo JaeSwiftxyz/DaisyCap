@@ -666,23 +666,6 @@ impl Renderer {
         }
         }
 
-        // The hand skin's sleeve: over the window, under the cursor. It
-        // continues the sprite's own grey cuff past the frame edge, so the
-        // frame cuts it. Its start sits under the sprite, hiding the join.
-        if let Some(arm) = &frame.arm
-            && arm.alpha > 0.002
-        {
-            let (min, max) = (arm.from.min(arm.to), arm.from.max(arm.to));
-            let pad = arm.width + 2.0;
-            let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
-            let mut d = Draw::new(MODE_CALLOUT, rect, size);
-            d.p0 = [arm.width as f32, arm.width as f32, 0.0, arm.alpha as f32];
-            d.p3 = [arm.from.x as f32, arm.from.y as f32, arm.to.x as f32, arm.to.y as f32];
-            d.p4 = [art::HAND_SLEEVE[0], art::HAND_SLEEVE[1], art::HAND_SLEEVE[2], 1.0];
-            d.out[3] = 1.0;
-            main.push((d, TexId::Dummy));
-        }
-
         // Click circles under the cursor.
         for c in &frame.circles {
             let r = c.radius.max(0.5);
@@ -711,6 +694,23 @@ impl Renderer {
                 d.p2 = [c.blur as f32, c.velocity.x as f32, c.velocity.y as f32, 0.0];
                 main.push((d, TexId::Cursor(id)));
             }
+        }
+
+        // The hand skin's sleeve: over the sprite, so the sprite's own sleeve
+        // edge can't show as a seam. It carries the sleeve on past the frame
+        // edge, so the frame cuts it.
+        if let Some(arm) = &frame.arm
+            && arm.alpha > 0.002
+        {
+            let (min, max) = (arm.from.min(arm.to), arm.from.max(arm.to));
+            let pad = arm.width + 2.0;
+            let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
+            let mut d = Draw::new(MODE_CALLOUT, rect, size);
+            d.p0 = [arm.width as f32, arm.width as f32, 0.0, arm.alpha as f32];
+            d.p3 = [arm.from.x as f32, arm.from.y as f32, arm.to.x as f32, arm.to.y as f32];
+            d.p4 = [art::HAND_SLEEVE[0], art::HAND_SLEEVE[1], art::HAND_SLEEVE[2], 1.0];
+            d.out[3] = 1.0;
+            main.push((d, TexId::Dummy));
         }
 
         // Camera.
