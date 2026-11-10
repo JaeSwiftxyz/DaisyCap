@@ -360,8 +360,11 @@ fn cursor(ui: &mut Ui, ed: &mut Editor, d: &mut Project, no_data: bool) {
         toggle_row(ui, "Hide cursor", &mut c.hide);
         slider(ui, "Size", &mut c.size, 0.5..=4.0, "×");
         row(ui, "Style", |ui| {
-            segmented(ui, &mut c.skin, &[(CursorSkin::Touch, "Touch"), (CursorSkin::Vector, "Vector"), (CursorSkin::System, "System")]);
+            segmented(ui, &mut c.skin, &[(CursorSkin::Hand, "Hand"), (CursorSkin::Touch, "Touch"), (CursorSkin::Vector, "Vector"), (CursorSkin::System, "System")]);
         });
+        if c.skin == CursorSkin::Hand {
+            caption(ui, "The hand's suit sleeve runs off the frame edge.");
+        }
     });
     section(ui, "Movement", |ui| {
         spring_picker(

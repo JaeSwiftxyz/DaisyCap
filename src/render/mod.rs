@@ -95,7 +95,11 @@ impl Image {
         self
     }
     pub fn from_png(path: &Path) -> Result<Self> {
-        let img = image::open(path)?.to_rgba8();
+        Self::from_png_bytes(&std::fs::read(path)?)
+    }
+
+    pub fn from_png_bytes(bytes: &[u8]) -> Result<Self> {
+        let img = image::load_from_memory(bytes)?.to_rgba8();
         Ok(Image { width: img.width(), height: img.height(), rgba: img.into_raw() }.premultiply())
     }
 }
@@ -441,6 +445,7 @@ impl Renderer {
             CursorSkin::System => 0,
             CursorSkin::Vector => 1,
             CursorSkin::Touch => 2,
+            CursorSkin::Hand => 3,
         };
         if self.cursor_art.get(&u32::MAX).map(|v| v.1) != Some(skin_key as f64) {
             self.cursor_art.clear();
@@ -465,6 +470,7 @@ impl Renderer {
                     }
                     CursorSkin::Vector => art::vector_cursor(c.system.as_deref()),
                     CursorSkin::Touch => art::touch_cursor(),
+                    CursorSkin::Hand => art::hand_cursor(),
                 };
                 self.upload(TexId::Cursor(c.id), &img, true);
                 self.cursor_art.insert(c.id, (hotspot, scale));
@@ -472,6 +478,7 @@ impl Renderer {
             if rec.cursors.is_empty() {
                 let (img, hotspot, scale) = match style.cursor.skin {
                     CursorSkin::Touch => art::touch_cursor(),
+                    CursorSkin::Hand => art::hand_cursor(),
                     _ => art::vector_cursor(Some("arrow")),
                 };
                 self.upload(TexId::Cursor(0), &img, true);
@@ -687,6 +694,23 @@ impl Renderer {
                 d.p2 = [c.blur as f32, c.velocity.x as f32, c.velocity.y as f32, 0.0];
                 main.push((d, TexId::Cursor(id)));
             }
+        }
+
+        // The hand skin's sleeve: over the sprite, so the sprite's own sleeve
+        // edge can't show as a seam. It carries the sleeve on past the frame
+        // edge, so the frame cuts it.
+        if let Some(arm) = &frame.arm
+            && arm.alpha > 0.002
+        {
+            let (min, max) = (arm.from.min(arm.to), arm.from.max(arm.to));
+            let pad = arm.width + 2.0;
+            let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
+            let mut d = Draw::new(MODE_CALLOUT, rect, size);
+            d.p0 = [arm.width as f32, arm.width as f32, 0.0, arm.alpha as f32];
+            d.p3 = [arm.from.x as f32, arm.from.y as f32, arm.to.x as f32, arm.to.y as f32];
+            d.p4 = [art::HAND_SLEEVE[0], art::HAND_SLEEVE[1], art::HAND_SLEEVE[2], 1.0];
+            d.out[3] = 2.0;
+            main.push((d, TexId::Dummy));
         }
 
         // Camera.

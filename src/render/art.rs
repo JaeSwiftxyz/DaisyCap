@@ -1,5 +1,5 @@
-//! Built-in artwork generated in code: wallpapers and vector cursors.
-//! (No third-party images are bundled.)
+//! Built-in artwork: wallpapers and vector cursors drawn in code, plus the
+//! bundled hand sprite (`assets/hand-cursor.png`).
 
 use super::Image;
 use crate::engine::geom::{Vec2, v2};
@@ -197,4 +197,52 @@ pub fn touch_cursor() -> (Image, Vec2, f64) {
         }
     }
     (Image { width: s, height: s, rgba }, v2(0.5, 0.5), 1.4)
+}
+
+/// A palm, index finger and curled knuckles are too fiddly to draw, so the
+/// hand is a bundled sprite with its background removed: `assets/hand-cursor.png`
+/// (361 px square, fingertip near its top-left). The sleeve is its own layer,
+/// so only its geometry is repeated here, measured off the sprite.
+pub const HAND_DRAW: f64 = 2.70;
+/// The sleeve's start, angle and width, as fractions of the sprite. The start
+/// sits on the sprite's cuff line and the arm draws over the sprite's own
+/// sleeve, so its edge can't show as a seam. Measured off the sprite: the
+/// start is the cuff/grey boundary shifted to the sleeve's centre line, and
+/// the width covers its whole sleeve with a margin.
+pub const HAND_ARM_FROM: Vec2 = v2(0.493, 0.651);
+/// How far along the sleeve the arm starts, past `HAND_ARM_FROM`.
+pub const HAND_ARM_START: f64 = -0.006;
+pub const HAND_ARM_DEG: f64 = 60.0;
+pub const HAND_ARM_WIDTH: f64 = 0.376;
+/// The sleeve's grey, matching the sprite's cuff.
+pub const HAND_SLEEVE: [f32; 3] = [0.310, 0.310, 0.310];
+
+/// The hand sprite, its fingertip hotspot and the height relative to a
+/// standard arrow. The drawn hand is twice an arrow.
+pub fn hand_cursor() -> (Image, Vec2, f64) {
+    let img = Image::from_png_bytes(include_bytes!("../../assets/hand-cursor.png")).expect("the hand sprite");
+    (img, v2(0.163, 0.080), HAND_DRAW)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hand_cursor_is_a_solid_hand_with_the_tip_ahead() {
+        let (img, hot, scale) = hand_cursor();
+        assert!(img.width > 0 && img.height > 0);
+        assert!(hot.x > 0.0 && hot.x < 1.0 && hot.y > 0.0 && hot.y < 1.0, "{hot:?}");
+        let alpha = |x: usize, y: usize| img.rgba[(y * img.width as usize + x) * 4 + 3];
+        let opaque = img.rgba.chunks_exact(4).filter(|p| p[3] > 200).count();
+        assert!(opaque > (img.width * img.height / 5) as usize, "the hand fills a good part of the sprite");
+        assert!(alpha(0, 0) < 10, "the top-left corner stays clear");
+        let tip = ((hot.x * img.width as f64) as usize, (hot.y * img.height as f64 + 8.0) as usize);
+        assert!(alpha(tip.0, tip.1) > 200, "the fingertip is solid");
+        assert!(scale > 1.0, "the hand draws larger than the arrow");
+        // The sleeve geometry sits inside the sprite and points down-right.
+        assert!(HAND_ARM_FROM.x > 0.0 && HAND_ARM_FROM.x < 1.0 && HAND_ARM_FROM.y > 0.0 && HAND_ARM_FROM.y < 1.0);
+        assert!((0.0..90.0).contains(&HAND_ARM_DEG));
+        assert!(HAND_ARM_WIDTH > 0.1 && HAND_ARM_WIDTH < 1.0);
+    }
 }
