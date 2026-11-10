@@ -200,8 +200,8 @@ pub fn touch_cursor() -> (Image, Vec2, f64) {
 }
 
 /// The hand's height in sprite units that draws at one standard arrow's
-/// height, so the hand comes out about a third larger than the arrow.
-pub const HAND_UNITS: f64 = 15.0;
+/// height, so the hand comes out about twice the arrow at the same size.
+pub const HAND_UNITS: f64 = 10.0;
 
 /// Signed distance to a rounded rect given its min corner and size.
 fn round_rect(p: Vec2, min: Vec2, size: Vec2, r: f64) -> f64 {
@@ -230,7 +230,7 @@ pub fn hand_cursor() -> (Image, Vec2, f64) {
         for (cx, cy) in [(11.6, 7.0), (13.0, 8.8), (13.2, 10.8)] {
             d = d.min((p - v2(cx, cy)).length() - 2.1);
         }
-        d.min(seg_dist(p, v2(4.8, 9.2), v2(1.8, 12.8)) - 2.2).min(round_rect(p, v2(4.0, 13.2), v2(11.2, 3.4), 1.7))
+        d.min(seg_dist(p, v2(5.4, 8.6), v2(2.0, 12.6)) - 2.2).min(round_rect(p, v2(4.0, 13.2), v2(11.2, 3.4), 1.7))
     };
     // A nail on the fingertip.
     let nail = |p: Vec2| {
