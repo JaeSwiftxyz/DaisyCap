@@ -253,7 +253,7 @@ transcription were exercised only through their code paths and test media.
 - 2026-11-07: a split joins seamlessly (the dip at cuts only plays where the
   recording jumps); 0.2.5.
 - 2026-11-10: cursor hand skin: an illustrated hand whose suit sleeve runs off
-  the frame edge, drawn in code.
+  the frame edge, drawn in code. 0.2.6.
 
 - Live preview is Retina-sharp, as in Rec: screens are captured at native
   pixel size (`SCCaptureResolutionType::Best`, sRGB, 30 fps), Lanczos-scaled

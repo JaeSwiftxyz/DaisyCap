@@ -11,6 +11,11 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// What's new in this version, newest first.
 pub const NOTES: &[(&str, &[&str])] = &[(
+    "0.2.6",
+    &[
+        "Cursor: a Hand skin whose suit sleeve always runs off the frame edge.",
+    ],
+), (
     "0.2.5",
     &[
         "Splitting a clip joins the halves seamlessly, and the dip at cuts only plays where the recording jumps.",
