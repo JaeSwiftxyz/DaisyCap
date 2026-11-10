@@ -74,13 +74,6 @@ pub struct ArmLayer {
     pub alpha: f64,
 }
 
-/// Fixed sleeve angle, degrees below horizontal, down and to the right.
-const ARM_DEG: f64 = 48.0;
-/// Where the wrist sits from the fingertip, in hand heights (x right, y down).
-const ARM_WRIST: Vec2 = v2(0.33, 0.95);
-/// Sleeve thickness in hand heights.
-const ARM_WIDTH: f64 = 0.50;
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct CircleFx {
     pub pos: Vec2,
@@ -490,17 +483,17 @@ impl Scene {
                 velocity,
             });
             if style.cursor.skin == CursorSkin::Hand {
-                // The sleeve: steady, from the wrist past the frame edge, so
-                // the frame always cuts it. It fades with the hand.
-                // 20 sprite units is the hand's content height, so this is the
-                // hand as drawn, and the sleeve follows it.
-                let hand = cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale * 20.0 / art::HAND_UNITS;
+                // The sleeve: steady, from the sprite's cuff past the frame
+                // edge, so the frame always cuts it. It fades with the hand.
+                // Its start, angle and width are measured off the sprite, in
+                // sprite fractions.
+                let sprite = cursor::BASE_HEIGHT * style.cursor.size * k * zoom_scale * art::HAND_DRAW;
                 let rot = cv[2].to_radians();
-                let off = ARM_WRIST * hand;
+                let off = art::HAND_ARM_FROM * sprite;
                 let wrist = pos + v2(off.x * rot.cos() - off.y * rot.sin(), off.x * rot.sin() + off.y * rot.cos());
-                let a = (ARM_DEG + style.cursor.base_rotation).to_radians();
+                let a = (art::HAND_ARM_DEG + style.cursor.base_rotation).to_radians();
                 let dir = v2(a.cos(), a.sin());
-                arm = Some(ArmLayer { from: wrist, to: wrist + dir * (size.x + size.y), width: ARM_WIDTH * hand, alpha: vis_alpha });
+                arm = Some(ArmLayer { from: wrist, to: wrist + dir * (size.x + size.y), width: art::HAND_ARM_WIDTH * sprite, alpha: vis_alpha });
             }
             let fx_px = 16.0 * style.cursor.size * k * zoom_scale;
             match style.cursor.click_effect {

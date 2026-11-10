@@ -95,7 +95,11 @@ impl Image {
         self
     }
     pub fn from_png(path: &Path) -> Result<Self> {
-        let img = image::open(path)?.to_rgba8();
+        Self::from_png_bytes(&std::fs::read(path)?)
+    }
+
+    pub fn from_png_bytes(bytes: &[u8]) -> Result<Self> {
+        let img = image::load_from_memory(bytes)?.to_rgba8();
         Ok(Image { width: img.width(), height: img.height(), rgba: img.into_raw() }.premultiply())
     }
 }
@@ -662,30 +666,21 @@ impl Renderer {
         }
         }
 
-        // The hand skin's sleeve: over the window, under the cursor and the
-        // click effects. It runs past the frame edge, so the frame cuts it.
+        // The hand skin's sleeve: over the window, under the cursor. It
+        // continues the sprite's own grey cuff past the frame edge, so the
+        // frame cuts it. Its start sits under the sprite, hiding the join.
         if let Some(arm) = &frame.arm
             && arm.alpha > 0.002
         {
-            let seg = arm.to - arm.from;
-            let dir = v2(seg.x / seg.length(), seg.y / seg.length());
-            let mut shaft = |from: Vec2, to: Vec2, thick: f64, head: f64, color: [f32; 3]| {
-                let (min, max) = (from.min(to), from.max(to));
-                let pad = thick + 2.0;
-                let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
-                let mut d = Draw::new(MODE_CALLOUT, rect, size);
-                d.p0 = [thick as f32, head as f32, 0.0, arm.alpha as f32];
-                d.p3 = [from.x as f32, from.y as f32, to.x as f32, to.y as f32];
-                d.p4 = [color[0], color[1], color[2], 1.0];
-                d.out[3] = 1.0;
-                main.push((d, TexId::Dummy));
-            };
-            let wrist = arm.from;
-            // A clean white cuff band, slightly proud of the grey sleeve.
-            shaft(wrist, wrist + dir * (arm.width * 0.85), arm.width * 1.06, arm.width * 0.6, [0.965, 0.963, 0.957]);
-            shaft(wrist + dir * (arm.width * 0.75), arm.to, arm.width, arm.width * 0.4, [0.290, 0.290, 0.302]);
-            let edge = v2(dir.y, -dir.x) * (arm.width * 0.30);
-            shaft(wrist + dir * (arm.width * 0.7) + edge, arm.to + edge, arm.width * 0.35, arm.width * 0.2, [0.361, 0.361, 0.373]);
+            let (min, max) = (arm.from.min(arm.to), arm.from.max(arm.to));
+            let pad = arm.width + 2.0;
+            let rect = Rect::from_min_size(min - Vec2::splat(pad), (max - min) + Vec2::splat(2.0 * pad));
+            let mut d = Draw::new(MODE_CALLOUT, rect, size);
+            d.p0 = [arm.width as f32, arm.width as f32, 0.0, arm.alpha as f32];
+            d.p3 = [arm.from.x as f32, arm.from.y as f32, arm.to.x as f32, arm.to.y as f32];
+            d.p4 = [art::HAND_SLEEVE[0], art::HAND_SLEEVE[1], art::HAND_SLEEVE[2], 1.0];
+            d.out[3] = 1.0;
+            main.push((d, TexId::Dummy));
         }
 
         // Click circles under the cursor.

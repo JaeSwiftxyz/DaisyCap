@@ -1,5 +1,5 @@
-//! Built-in artwork generated in code: wallpapers and vector cursors.
-//! (No third-party images are bundled.)
+//! Built-in artwork: wallpapers and vector cursors drawn in code, plus the
+//! bundled hand sprite (`assets/hand-cursor.png`).
 
 use super::Image;
 use crate::engine::geom::{Vec2, v2};
@@ -199,74 +199,23 @@ pub fn touch_cursor() -> (Image, Vec2, f64) {
     (Image { width: s, height: s, rgba }, v2(0.5, 0.5), 1.4)
 }
 
-/// The hand's height in sprite units that draws at one standard arrow's
-/// height, so the hand comes out about twice the arrow at the same size.
-pub const HAND_UNITS: f64 = 10.0;
+/// A palm, index finger and curled knuckles are too fiddly to draw, so the
+/// hand is a bundled sprite with its background removed: `assets/hand-cursor.png`
+/// (361 px square, fingertip near its top-left). The sleeve is its own layer,
+/// so only its geometry is repeated here, measured off the sprite.
+pub const HAND_DRAW: f64 = 2.70;
+/// The sleeve's start, angle and width, as fractions of the sprite.
+pub const HAND_ARM_FROM: Vec2 = v2(0.523, 0.634);
+pub const HAND_ARM_DEG: f64 = 60.0;
+pub const HAND_ARM_WIDTH: f64 = 0.355;
+/// The sleeve's grey, matching the sprite's cuff.
+pub const HAND_SLEEVE: [f32; 3] = [0.310, 0.310, 0.310];
 
-/// Signed distance to a rounded rect given its min corner and size.
-fn round_rect(p: Vec2, min: Vec2, size: Vec2, r: f64) -> f64 {
-    let (qx, qy) = ((p.x - min.x - size.x / 2.0).abs() - size.x / 2.0 + r, (p.y - min.y - size.y / 2.0).abs() - size.y / 2.0 + r);
-    let (mx, my) = (qx.max(0.0), qy.max(0.0));
-    (mx * mx + my * my).sqrt() + qx.max(qy).min(0.0) - r
-}
-
-/// The hand skin: a flat illustration of a hand pointing up and to the left,
-/// fingertip at the hotspot, with a soft shadow and a nail. The sprite ends at
-/// the wrist; the cuff and sleeve are the arm layer's job (see
-/// `engine::scene`). Returns the image, the hotspot and the height relative to
-/// a standard arrow.
+/// The hand sprite, its fingertip hotspot and the height relative to a
+/// standard arrow. The drawn hand is twice an arrow.
 pub fn hand_cursor() -> (Image, Vec2, f64) {
-    const PX: f64 = 6.0;
-    let pad = 4.0;
-    let tip = v2(3.0, -3.0);
-    let units = v2(17.0, 22.0);
-    let (w, h) = (((units.x + 2.0 * pad) * PX).ceil() as u32, ((units.y + 2.0 * pad) * PX).ceil() as u32);
-
-    // The silhouette: finger up, the fist with curled knuckles on the right,
-    // the thumb alongside, and a wide wrist stub the cuff sits under.
-    let hand = |p: Vec2| -> f64 {
-        let mut d = seg_dist(p, tip, v2(5.8, 6.4)) - 2.3;
-        d = d.min(round_rect(p, v2(3.4, 5.8), v2(10.4, 7.8), 3.6));
-        for (cx, cy) in [(11.6, 7.0), (13.0, 8.8), (13.2, 10.8)] {
-            d = d.min((p - v2(cx, cy)).length() - 2.1);
-        }
-        d.min(seg_dist(p, v2(5.4, 8.6), v2(2.0, 12.6)) - 2.2).min(round_rect(p, v2(4.0, 13.2), v2(11.2, 3.4), 1.7))
-    };
-    // A nail on the fingertip.
-    let nail = |p: Vec2| {
-        let q = v2((p.x - 3.9) / 1.3, (p.y + 1.0) / 1.8);
-        q.length() - 1.0
-    };
-    let light = [0.965, 0.804, 0.651];
-    let dark = [0.910, 0.714, 0.545];
-    let nail_col = [0.984, 0.890, 0.808];
-    let mut rgba = Vec::with_capacity((w * h * 4) as usize);
-    for y in 0..h {
-        for x in 0..w {
-            let p = v2((x as f64 + 0.5) / PX - pad, (y as f64 + 0.5) / PX - pad);
-            let aa = 0.75 / PX;
-            let cover = |d: f64| ((-d) / aa + 0.5).clamp(0.0, 1.0);
-            let shadow = cover(hand(p - v2(0.35, 0.7))) * 0.18;
-            let fill = cover(hand(p));
-            let t = ((p.y - tip.y) / 19.0).clamp(0.0, 1.0);
-            let col = [light[0] + (dark[0] - light[0]) * t, light[1] + (dark[1] - light[1]) * t, light[2] + (dark[2] - light[2]) * t];
-            let mark = cover(nail(p)) * fill;
-            // Composite premultiplied, back to front: shadow, skin, nail.
-            let mut a = shadow;
-            let mut c = [0.0, 0.0, 0.0];
-            let over = |c: &mut [f64; 3], a: &mut f64, col: [f64; 3], cov: f64| {
-                for i in 0..3 {
-                    c[i] = col[i] * cov + c[i] * (1.0 - cov);
-                }
-                *a = cov + *a * (1.0 - cov);
-            };
-            over(&mut c, &mut a, col, fill);
-            over(&mut c, &mut a, nail_col, mark);
-            rgba.extend_from_slice(&[(c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8, (a * 255.0) as u8]);
-        }
-    }
-    let hot = v2((tip.x + pad) / (units.x + 2.0 * pad), (tip.y + pad) / (units.y + 2.0 * pad));
-    (Image { width: w, height: h, rgba }, hot, (units.y + 2.0 * pad) / HAND_UNITS)
+    let img = Image::from_png_bytes(include_bytes!("../../assets/hand-cursor.png")).expect("the hand sprite");
+    (img, v2(0.163, 0.080), HAND_DRAW)
 }
 
 #[cfg(test)]
@@ -280,10 +229,14 @@ mod tests {
         assert!(hot.x > 0.0 && hot.x < 1.0 && hot.y > 0.0 && hot.y < 1.0, "{hot:?}");
         let alpha = |x: usize, y: usize| img.rgba[(y * img.width as usize + x) * 4 + 3];
         let opaque = img.rgba.chunks_exact(4).filter(|p| p[3] > 200).count();
-        assert!(opaque > (img.width * img.height / 8) as usize, "the hand fills a good part of the sprite");
+        assert!(opaque > (img.width * img.height / 5) as usize, "the hand fills a good part of the sprite");
         assert!(alpha(0, 0) < 10, "the top-left corner stays clear");
-        let tip = ((hot.x + 0.05) * img.width as f64) as usize;
-        assert!(alpha(tip.min(img.width as usize - 1), 2) > 200, "the fingertip is solid");
-        assert!((scale - (22.0 + 8.0) / HAND_UNITS).abs() < 1e-6, "scale matches the sprite height");
+        let tip = ((hot.x * img.width as f64) as usize, (hot.y * img.height as f64 + 8.0) as usize);
+        assert!(alpha(tip.0, tip.1) > 200, "the fingertip is solid");
+        assert!(scale > 1.0, "the hand draws larger than the arrow");
+        // The sleeve geometry sits inside the sprite and points down-right.
+        assert!(HAND_ARM_FROM.x > 0.0 && HAND_ARM_FROM.x < 1.0 && HAND_ARM_FROM.y > 0.0 && HAND_ARM_FROM.y < 1.0);
+        assert!((0.0..90.0).contains(&HAND_ARM_DEG));
+        assert!(HAND_ARM_WIDTH > 0.1 && HAND_ARM_WIDTH < 1.0);
     }
 }
