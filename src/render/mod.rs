@@ -441,6 +441,7 @@ impl Renderer {
             CursorSkin::System => 0,
             CursorSkin::Vector => 1,
             CursorSkin::Touch => 2,
+            CursorSkin::Hand => 3,
         };
         if self.cursor_art.get(&u32::MAX).map(|v| v.1) != Some(skin_key as f64) {
             self.cursor_art.clear();
@@ -465,6 +466,7 @@ impl Renderer {
                     }
                     CursorSkin::Vector => art::vector_cursor(c.system.as_deref()),
                     CursorSkin::Touch => art::touch_cursor(),
+                    CursorSkin::Hand => art::hand_cursor(),
                 };
                 self.upload(TexId::Cursor(c.id), &img, true);
                 self.cursor_art.insert(c.id, (hotspot, scale));
@@ -472,6 +474,7 @@ impl Renderer {
             if rec.cursors.is_empty() {
                 let (img, hotspot, scale) = match style.cursor.skin {
                     CursorSkin::Touch => art::touch_cursor(),
+                    CursorSkin::Hand => art::hand_cursor(),
                     _ => art::vector_cursor(Some("arrow")),
                 };
                 self.upload(TexId::Cursor(0), &img, true);

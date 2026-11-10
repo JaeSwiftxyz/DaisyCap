@@ -202,6 +202,8 @@ pub enum CursorSkin {
     Vector,
     /// A soft touch-style circle.
     Touch,
+    /// An illustrated hand whose suit sleeve runs off the frame edge.
+    Hand,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -1180,6 +1182,15 @@ impl Default for Project {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_hand_skin_round_trips_and_stays_opt_in() {
+        assert_eq!(CursorSkin::default(), CursorSkin::System);
+        assert_eq!(serde_json::to_string(&CursorSkin::Hand).unwrap(), "\"hand\"");
+        assert_eq!(serde_json::from_str::<CursorSkin>("\"hand\"").unwrap(), CursorSkin::Hand);
+        let old: CursorStyle = serde_json::from_str("{}").unwrap();
+        assert_eq!(old.skin, CursorSkin::System, "an old project opens to System");
+    }
 
     #[test]
     fn brand_round_trips() {
